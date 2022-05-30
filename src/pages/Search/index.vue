@@ -1,12 +1,18 @@
 <template>
-    
-    <h1>params参数{{$route.params.keyword}}-----{{$route.query.k}}</h1>
+    <div>
+        search
+        <TypeNav></TypeNav>
+    </div>
     
 </template>
 
 <script>
+import TypeNav from '@/components/TypeNav/index.vue';
+import { shallowReactive } from '@vue/reactivity';
 export default {
-    name:'Search'
+    name: "Search",
+    components: { TypeNav },
+    
 }
 </script>
 

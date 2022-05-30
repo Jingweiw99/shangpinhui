@@ -2,34 +2,38 @@
   <div class="type-nav">
     <div class="container">
       <!-- 利用事件委派 -->
-      <div @mouseleave="leaveIndex">
+      <div @mouseleave="leaveShow" @mouseenter="enterShow">
         <h2 class="all">全部商品分类</h2>
-        <div class="sort">
-          <!-- 利用事件委派和编程时导航实现路由跳转 -->
-          <div class="all-sort-list2" @click="goSearch">
-            <div class="item" v-for="(c1, index) in categoryList" :key="c1.categoryId"
-              :class="{ cur: currentIndex == index }">
-              <h3 @mouseenter="changeIndex(index)">
-                <a :data-categoryName="c1.categoryName" :data-category1Id="c1.categoryId">{{ c1.categoryName }}</a>
-              </h3>
-              <div class="item-list clearfix" :style="{ display: currentIndex == index ? 'block' : 'none' }">
-                <div class="subitem" v-for="c2 in c1.categoryChild" :key="c2.categoryId">
-                  <dl class="fore">
-                    <dt>
-                      <a :data-categoryName="c2.categoryName" :data-category1Id="c2.categoryId">{{c2.categoryName }}</a>
-                    </dt>
-                    <dd>
-                      <em v-for="c3 in c2.categoryChild" :key="c3.categoryId">
-                        <a :data-categoryName="c3.categoryName"
-                          :data-category1Id="c3.categoryId">{{ c3.categoryName }}</a>
-                      </em>
-                    </dd>
-                  </dl>
+        <!-- 过度动画 -->
+        <transition name="sort">
+          <div class="sort" v-show="show">
+            <!-- 利用事件委派和编程时导航实现路由跳转 -->
+            <div class="all-sort-list2" @click="goSearch">
+              <div class="item" v-for="(c1, index) in categoryList" :key="c1.categoryId"
+                :class="{ cur: currentIndex == index }">
+                <h3 @mouseenter="changeIndex(index)">
+                  <a :data-categoryName="c1.categoryName" :data-category1Id="c1.categoryId">{{ c1.categoryName }}</a>
+                </h3>
+                <div class="item-list clearfix" :style="{ display: currentIndex == index ? 'block' : 'none' }">
+                  <div class="subitem" v-for="c2 in c1.categoryChild" :key="c2.categoryId">
+                    <dl class="fore">
+                      <dt>
+                        <a :data-categoryName="c2.categoryName"
+                          :data-category1Id="c2.categoryId">{{c2.categoryName }}</a>
+                      </dt>
+                      <dd>
+                        <em v-for="c3 in c2.categoryChild" :key="c3.categoryId">
+                          <a :data-categoryName="c3.categoryName"
+                            :data-category1Id="c3.categoryId">{{ c3.categoryName }}</a>
+                        </em>
+                      </dd>
+                    </dl>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
+        </transition>
       </div>
       <nav class="nav">
         <a href="###">服装城</a>
@@ -51,17 +55,23 @@ import { mapState } from "vuex";
 // import _ from 'lodash'
 import throttle from "lodash/throttle";
 
+
 export default {
   name: "TypeNav",
   data () {
     return {
       currentIndex: -1,
+      show: true
     };
   },
   //组件挂载完毕：可以向服务器发请求
   mounted () {
-    //通知Vuex发请求，获取数据，存储于仓库中
-    this.$store.dispatch("categoryList");
+
+    //当组件挂载完毕让show变为false，
+    if (this.$route.path !== '/home') {
+      this.show = false;
+
+    }
   },
   computed: {
     //这里是用的是对象形式的。
@@ -74,9 +84,7 @@ export default {
     changeIndex: throttle(function (index) {
       this.currentIndex = index;
     }, 20),
-    leaveIndex () {
-      this.currentIndex = -1;
-    },
+    
     goSearch (event) {
       //编程式导航加上事件委派，怎么知道点击的一定是a标签，如何获取参数。
       let element = event.target;
@@ -92,8 +100,29 @@ export default {
         } else {
           query.category3Id = category3id
         }
-        location.query = query
-        this.$router.push(location)
+        //判断:如果路由跳转的时候，带有params参数，捎带传递过去
+        if (this.$route.params) {
+          location.params=this.$route.params;
+          location.query = query
+          //路由跳转
+          this.$router.push(location)
+        }
+      }
+      
+
+    },
+    //鼠标移入的时候让商品分类列表进行展示。
+    enterShow () {
+      if (this.$route.path != '/home') {
+        this.show = true
+      }
+    },
+    //当鼠标离开的时候，让商品分类列表进行隐藏
+    leaveShow () {
+      this.currentIndex = -1;
+      if (this.$route.path != '/home') {
+        
+        this.show = false;
       }
 
     }
@@ -215,6 +244,16 @@ export default {
           background-color: skyblue;
         }
       }
+    }
+    //过度动画样式
+    .sort-enter {
+      height: 0;
+    }
+    .sort-enter-to {
+      height: 461px;
+    }
+    .sort-enter-active {
+      transition: all 0.5s linear;
     }
   }
 }

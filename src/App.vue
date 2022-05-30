@@ -1,5 +1,5 @@
 <template>
-  <div id="app">   
+  <div id="app">
     <Header></Header>
     <!-- 路由组件出口 -->
     <router-view></router-view>
@@ -15,11 +15,14 @@ import Footer from './components/Footer'
 export default {
   name: '',
   components: {
-  Header,Footer
+    Header, Footer
+  },
+  mounted () {
+    //通知Vuex发请求，获取数据，存储于仓库中，在根组件中只执行一次。运行的时候就有了数据但是就是要用的会后才是使用。
+    this.$store.dispatch("categoryList");
   }
 }
 </script>
 
 <style scoped>
-
 </style>
