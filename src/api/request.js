@@ -24,7 +24,7 @@ requests.interceptors.response.use((res) => {
     nprogress.done();
     return res.data;
 },(error) => { 
-    return Promise.reject(new Error("faile"))
+    alert('服务器响应数据失败')
 });
 
 
